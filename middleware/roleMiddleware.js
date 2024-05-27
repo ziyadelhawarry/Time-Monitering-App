@@ -1,10 +1,13 @@
-const ensureEmployer = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'employer') {
-        return next();
+const role = (roles) => (req, res, next) => {
+    try {
+      if (!roles.includes(req.user.role)) {
+        return res.status(403).send({ error: 'Access denied.' });
+      }
+      next();
+    } catch (error) {
+      res.status(500).send({ error: 'Internal Server Error.' });
     }
-    res.status(403).send('Forbidden');
-};
-
-module.exports = {
-    ensureEmployer,
-};
+  };
+  
+  module.exports = role;
+  

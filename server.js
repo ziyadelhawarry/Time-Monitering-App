@@ -1,46 +1,73 @@
 const express = require('express');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const http = require('http');
+const WebSocket = require('ws');
 const mongoose = require('mongoose');
-const path = require('path');
-const connectDB = require('./models/db');
-const userRoutes = require('./routes/userRoutes');
-const timeRoutes = require('./routes/timeRoutes');
+const dotenv = require('dotenv');
+const auth = require('./middleware/authMiddleware');
 const reportRoutes = require('./routes/reportRoutes');
-const { ensureAuthenticated } = require('./middleware/authMiddleware');
-const { ensureEmployer } = require('./middleware/roleMiddleware');
+const timeRoutes = require('./routes/timeRoutes');
+const userRoutes = require('./routes/userRoutes');
 
+dotenv.config();
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-connectDB();
+// Set the view engine to ejs
+app.set('view engine', 'ejs');
 
+// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/timeTrackingTool' }),
-}));
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/timeDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((error) => {
+  console.error('Error connecting to MongoDB:', error.message);
+});
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
+app.use(express.static('public'));
+app.use('/reports', reportRoutes);
+app.use('/time', timeRoutes);
 app.use('/users', userRoutes);
-app.use('/time', ensureAuthenticated, timeRoutes);
-app.use('/report', ensureAuthenticated, reportRoutes);
-app.use('/employer', ensureAuthenticated, ensureEmployer, (req, res) => {
-    res.render('employer', { freelancers: [] });
+
+// Define routes for register, login, and profile pages
+app.get('/register', (req, res) => {
+  res.render('register');
 });
 
-app.get('/', ensureAuthenticated, (req, res) => {
-    res.render('home');
+app.get('/login', (req, res) => {
+  res.render('login');
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.get('/profile', auth, (req, res) => {
+  res.render('profile', { user: req.user });
+});
+
+// Development route for testing time tracking without authentication
+app.get('/dev/timetracking', (req, res) => {
+  res.render('timetracking');
+});
+
+// Route to handle video toggling
+app.post('/toggle-video', (req, res) => {
+  // Simulate toggling video functionality
+  res.json({ success: true, isVideoEnabled: !req.body.isVideoEnabled });
+});
+
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    console.log('received: %s', message);
+  });
+  ws.send(JSON.stringify({ type: 'connection', message: 'WebSocket connection established' }));
+});
+
+server.listen(process.env.PORT || 3000, () => {
+  console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });

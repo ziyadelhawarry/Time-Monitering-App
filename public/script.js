@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     const startTrackingButton = document.getElementById('startTracking');
-    const stopTrackingButton = document.getElementById('stopTracking');
     const toggleVideoButton = document.getElementById('toggleVideo');
     const videoStreamElement = document.getElementById('videoStream');
     const projectNameInput = document.getElementById('projectName');
     const ws = new WebSocket('ws://localhost:3000');
+    let startTime;
+    let timerInterval;
+    let localStream;
+    let peerConnection;
+    const config = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' }
+        ]
+    };
 
     ws.onopen = () => {
         console.log('WebSocket connection opened');
@@ -12,23 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ws.onmessage = async event => {
         const data = JSON.parse(event.data);
-        if (data.type === 'videoStatus') {
-            toggleVideoButton.innerText = data.isVideoEnabled ? 'Disable Video' : 'Enable Video';
-        }
-        if (data.type === 'timeUpdate') {
-            updateTimeDisplay(data.elapsedTime);
-        }
-        if (data.type === 'offer') {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            ws.send(JSON.stringify({ type: 'answer', answer: answer }));
-        } else if (data.type === 'answer') {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-        } else if (data.type === 'candidate') {
-            if (data.candidate) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
+        switch (data.type) {
+            case 'videoStatus':
+                toggleVideoButton.innerText = data.isVideoEnabled ? 'Disable Video' : 'Enable Video';
+                break;
+            case 'timeUpdate':
+                updateTimeDisplay(data.elapsedTime);
+                break;
+            case 'offer':
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                ws.send(JSON.stringify({ type: 'answer', answer: answer }));
+                break;
+            case 'answer':
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                break;
+            case 'candidate':
+                if (data.candidate) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+                break;
         }
     };
 
@@ -45,16 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggleVideoButton) {
         toggleVideoButton.addEventListener('click', () => toggleVideo(ws));
     }
-
-    let startTime;
-    let timerInterval;
-    let localStream;
-    let peerConnection;
-    const config = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' }
-        ]
-    };
 
     function startTracking(ws, projectName) {
         fetch('/time/start', {

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Welcome, <%= user ? user.name : 'User' %></h1>
+  <p>Email: <%= user ? user.email : 'N/A' %></p>
+  <p>Role: <%= user ? user.role : 'N/A' %></p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      console.log('Token from Local Storage:', token); // Log the token for debugging
+      
+      const response = await fetch('/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const result = await response.json();
+      console.log('Profile Fetch Result:', result); // Log the response for debugging
+      
+      if (!response.ok) {
+        alert(result.error);
+        window.location.href = '/login';
+      }
+    });
+  </script>
+</body>
+</html>

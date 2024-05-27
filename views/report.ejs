@@ -1,44 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <header>
-        <h1>Time Tracking Report</h1>
-        <a href="/logout">Logout</a>
-    </header>
-    <div class="container">
-        <h2>Time Entries</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Project Name</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% timeEntries.forEach(entry => { %>
-                    <tr>
-                        <td><%= entry.projectName %></td>
-                        <td><%= entry.startTime.toLocaleString() %></td>
-                        <td><%= entry.endTime ? entry.endTime.toLocaleString() : 'In Progress' %></td>
-                        <td>
-                            <% if (entry.endTime) { %>
-                                <%= ((new Date(entry.endTime) - new Date(entry.startTime)) / 1000 / 60).toFixed(2) %> minutes
-                            <% } else { %>
-                                In Progress
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div>
+  <h1>Report</h1>
+  <div id="reportContent"></div>
+  <script src="/script.js"></script>
 </body>
 </html>

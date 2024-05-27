@@ -1,10 +1,29 @@
 const mongoose = require('mongoose');
 
 const timeEntrySchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    projectName: String,
-    startTime: Date,
-    endTime: Date,
+  projectName: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  startTime: {
+    type: Date,
+    required: true,
+  },
+  endTime: {
+    type: Date,
+    default: null,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
 });
 
-module.exports = mongoose.model('TimeEntry', timeEntrySchema);
+const TimeEntry = mongoose.model('TimeEntry', timeEntrySchema);
+
+module.exports = TimeEntry;

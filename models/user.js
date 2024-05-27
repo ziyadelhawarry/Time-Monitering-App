@@ -1,23 +1,34 @@
-const bcrypt = require('bcrypt');
-const users = [];
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-async function registerUser(username, password) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = { username, password: hashedPassword };
-    users.push(user);
-    return user;
-}
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    default: 'user'
+  }
+}, { timestamps: true });
 
-async function authenticateUser(username, password) {
-    const user = users.find(user => user.username === username);
-    if (user && await bcrypt.compare(password, user.password)) {
-        return user;
-    }
-    return null;
-}
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
+  next();
+});
 
-module.exports = {
-    registerUser,
-    authenticateUser,
-    users
-};
+module.exports = mongoose.model('User', userSchema);

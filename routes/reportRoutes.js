@@ -1,16 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const TimeEntry = require('../models/timeEntryModel');
-const authMiddleware = require('../middleware/authMiddleware');
+const auth = require('../middleware/authMiddleware');
+const { generateReport } = require('../controllers/reportController');
 
-router.get('/', authMiddleware, async (req, res) => {
-    try {
-        const timeEntries = await TimeEntry.find({ user: req.session.user._id });
-        res.render('report', { timeEntries });
-    } catch (error) {
-        console.error('Error fetching reports:', error);
-        res.redirect('/');
-    }
-});
+router.get('/generate', auth, generateReport);
 
 module.exports = router;

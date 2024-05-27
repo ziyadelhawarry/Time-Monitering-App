@@ -1,41 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const TimeEntry = require('../models/timeEntryModel');
-const authMiddleware = require('../middleware/authMiddleware');
+const { startTracking, stopTracking } = require('../controllers/timeController');
+const auth = require('../middleware/authMiddleware');
 
-router.post('/start', authMiddleware, async (req, res) => {
-    const { projectName } = req.body;
-    try {
-        const timeEntry = new TimeEntry({
-            user: req.session.user._id,
-            projectName,
-            startTime: new Date()
-        });
-        await timeEntry.save();
-        res.json({ success: true, timeEntry });
-    } catch (error) {
-        console.error('Error starting time entry:', error);
-        res.json({ success: false, error });
-    }
-});
+// Existing routes
+router.post('/start', auth, startTracking);
+router.post('/stop', auth, stopTracking);
 
-router.post('/stop', authMiddleware, async (req, res) => {
-    try {
-        const timeEntry = await TimeEntry.findOne({
-            user: req.session.user._id,
-            endTime: { $exists: false }
-        });
-        if (timeEntry) {
-            timeEntry.endTime = new Date();
-            await timeEntry.save();
-            res.json({ success: true, timeEntry });
-        } else {
-            res.json({ success: false, error: 'No active time entry found' });
-        }
-    } catch (error) {
-        console.error('Error stopping time entry:', error);
-        res.json({ success: false, error });
-    }
-});
+// Development routes without authentication
+router.post('/dev/start', startTracking);
+router.post('/dev/stop', stopTracking);
 
 module.exports = router;

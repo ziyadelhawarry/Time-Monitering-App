@@ -1,52 +1,51 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  h1 {
     color: #333;
-}
-
-header {
-    background-color: #0052cc;
-    padding: 10px 0;
-    color: #fff;
-    text-align: center;
-}
-
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-button {
-    background-color: #0052cc;
-    color: #fff;
-    border: none;
+  }
+  
+  p {
+    color: #666;
+  }
+  
+  button {
     padding: 10px 20px;
-    border-radius: 4px;
+    margin: 5px;
+    font-size: 16px;
     cursor: pointer;
-    margin-right: 10px;
-}
-
-button:hover {
-    background-color: #004bb5;
-}
-
-#videoStream {
-    width: 100%;
-    max-width: 400px;
+  }
+  
+  #videoStream {
+    width: 640px;
+    height: 480px;
+    background: #000;
+  }
+  
+  #timeDisplay {
+    font-size: 20px;
     margin: 20px 0;
-}
-
-#timeHistory {
+  }
+  
+  #timeHistory {
+    width: 80%;
+    max-height: 200px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
     margin-top: 20px;
-}
-
-#timeHistory div {
-    background-color: #f0f0f0;
     padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 4px;
-}
+  }
+  
+  #timeHistory div {
+    margin: 5px 0;
+  }
+  
