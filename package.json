@@ -1,0 +1,21 @@
+{
+  "name": "time-tracking-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "connect-mongo": "^5.1.0",
+    "ejs": "^3.1.10",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "express-validator": "^7.1.0",
+    "mongoose": "^8.4.0",
+    "webrtc-adapter": "^9.0.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
