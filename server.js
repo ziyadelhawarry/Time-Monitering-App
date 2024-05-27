@@ -1,58 +1,46 @@
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const http = require('http');
-const WebSocket = require('ws');
-const userRoutes = require('./routes/userRoutes');
-const reportRoutes = require('./routes/reportRoutes');
+const mongoose = require('mongoose');
+const path = require('path');
 const connectDB = require('./models/db');
-const app = express();
-const port = process.env.PORT || 3000;
+const userRoutes = require('./routes/userRoutes');
+const timeRoutes = require('./routes/timeRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const { ensureAuthenticated } = require('./middleware/authMiddleware');
+const { ensureEmployer } = require('./middleware/roleMiddleware');
 
-// Connect to MongoDB
+const app = express();
+
 connectDB();
 
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json()); // To handle JSON requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Session middleware configuration
 app.use(session({
     secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/timeTrackingTool' }),
-    cookie: { secure: false } // Set secure to true if using HTTPS
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/timeTrackingTool' }),
 }));
 
-app.use('/', userRoutes);
-app.use('/', reportRoutes);
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Create HTTP server
-const server = http.createServer(app);
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-// Create WebSocket server
-const wss = new WebSocket.Server({ server });
-
-// Integrate WebSocket with time tracking routes
-const timeRoutes = require('./routes/timeRoutes')(wss);
-app.use('/time', timeRoutes);
-
-wss.on('connection', ws => {
-    ws.on('message', message => {
-        const data = JSON.parse(message);
-        // Handle signaling messages for WebRTC here
-        if (data.type === 'offer' || data.type === 'answer' || data.type === 'candidate') {
-            wss.clients.forEach(client => {
-                if (client !== ws && client.readyState === WebSocket.OPEN) {
-                    client.send(message);
-                }
-            });
-        }
-    });
+app.use('/users', userRoutes);
+app.use('/time', ensureAuthenticated, timeRoutes);
+app.use('/report', ensureAuthenticated, reportRoutes);
+app.use('/employer', ensureAuthenticated, ensureEmployer, (req, res) => {
+    res.render('employer', { freelancers: [] });
 });
 
-server.listen(port, () => {
+app.get('/', ensureAuthenticated, (req, res) => {
+    res.render('home');
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

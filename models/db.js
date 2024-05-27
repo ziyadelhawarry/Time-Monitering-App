@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb://localhost:27017/timeTrackingTool', {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/timeTrackingTool', {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
         });
         console.log('MongoDB connected');
     } catch (error) {

@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const stopTrackingButton = document.getElementById('stopTracking');
     const toggleVideoButton = document.getElementById('toggleVideo');
     const videoStreamElement = document.getElementById('videoStream');
+    const projectNameInput = document.getElementById('projectName');
     const ws = new WebSocket('ws://localhost:3000');
 
     ws.onopen = () => {
@@ -32,11 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (startTrackingButton) {
-        startTrackingButton.addEventListener('click', () => startTracking(ws));
+        startTrackingButton.addEventListener('click', () => {
+            if (startTrackingButton.innerText === 'Start Tracking') {
+                startTracking(ws, projectNameInput.value);
+            } else {
+                stopTracking(ws);
+            }
+        });
     }
-    if (stopTrackingButton) {
-        stopTrackingButton.addEventListener('click', () => stopTracking(ws));
-    }
+
     if (toggleVideoButton) {
         toggleVideoButton.addEventListener('click', () => toggleVideo(ws));
     }
@@ -51,10 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    function startTracking(ws) {
+    function startTracking(ws, projectName) {
         fetch('/time/start', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectName })
         })
         .then(response => response.json())
         .then(data => {
@@ -62,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startTime = new Date(data.timeEntry.startTime);
                 timerInterval = setInterval(updateTime, 1000);
                 ws.send(JSON.stringify({ type: 'startTracking', startTime: startTime }));
+                startTrackingButton.innerText = 'Stop Tracking';
                 console.log('Tracking started:', startTime);
             } else {
                 console.error('Error starting time tracking:', data.error);
@@ -83,6 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerInterval);
                 updateTime();
                 ws.send(JSON.stringify({ type: 'stopTracking', endTime: new Date() }));
+                startTrackingButton.innerText = 'Start Tracking';
+                addTimeEntryToHistory(data.timeEntry);
                 console.log('Tracking stopped');
             } else {
                 console.error('Error stopping time tracking:', data.error);
@@ -171,5 +180,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateTimeDisplay(elapsedTime) {
         document.getElementById('timeDisplay').innerText = `Time: ${elapsedTime}`;
+    }
+
+    function addTimeEntryToHistory(timeEntry) {
+        const historyElement = document.getElementById('timeHistory');
+        const entryElement = document.createElement('div');
+        const entryDate = new Date(timeEntry.startTime).toLocaleDateString();
+        const entryStartTime = new Date(timeEntry.startTime).toLocaleTimeString();
+        const entryEndTime = new Date(timeEntry.endTime).toLocaleTimeString();
+
+        entryElement.innerText = `${entryDate} - ${timeEntry.projectName}: ${entryStartTime} - ${entryEndTime}`;
+        historyElement.appendChild(entryElement);
     }
 });

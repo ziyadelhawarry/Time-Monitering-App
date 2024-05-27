@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Time Tracking and Video Monitoring Tool</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <% if (user) { %>
-        <h1>Welcome <%= user.username %>!</h1>
+    <header>
+        <h1>Time Tracking and Video Monitoring Tool</h1>
         <a href="/logout">Logout</a>
-        <% if (user.role === 'freelancer') { %>
+    </header>
+    <div class="container">
+        <div>
+            <input type="text" id="projectName" placeholder="What are you working on?">
             <button id="startTracking">Start Tracking</button>
-            <button id="stopTracking">Stop Tracking</button>
-            <button id="toggleVideo"><%= user.isVideoEnabled ? 'Disable' : 'Enable' %> Video</button>
-            <div id="timeDisplay">Time: 00:00:00</div>
-            <% if (user.isVideoEnabled) { %>
-                <video id="videoStream" controls autoplay></video>
-            <% } %>
-        <% } %>
-    <% } else { %>
-        <h1>Welcome to the Time Tracking Tool</h1>
-        <a href="/login">Login</a> or <a href="/register">Register</a>
-    <% } %>
+            <button id="toggleVideo">Enable Video</button>
+        </div>
+        <p id="timeDisplay">Time: 00:00:00</p>
+        <video id="videoStream" autoplay></video>
+        <div id="timeHistory">
+            <h2>Time Tracking History</h2>
+        </div>
+    </div>
     <script src="/script.js"></script>
 </body>
 </html>

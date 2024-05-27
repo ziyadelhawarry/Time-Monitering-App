@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employer Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>Employer Dashboard</h1>
-    <a href="/logout">Logout</a>
-    <a href="/report">View Reports</a>
-    <div id="freelancers">
-        <% freelancers.forEach(freelancer => { %>
-            <div class="freelancer">
-                <h2><%= freelancer.username %></h2>
-                <p>Status: <%= freelancer.isVideoEnabled ? 'Online' : 'Offline' %></p>
-                <% if (freelancer.isVideoEnabled) { %>
-                    <video id="videoStream-<%= freelancer._id %>" controls autoplay></video>
-                <% } %>
-            </div>
-        <% }) %>
+    <header>
+        <h1>Employer Dashboard</h1>
+        <a href="/logout">Logout</a>
+    </header>
+    <div class="container">
+        <h2>Freelancers</h2>
+        <ul>
+            <% freelancers.forEach(freelancer => { %>
+                <li>
+                    <%= freelancer.username %> - 
+                    <%= freelancer.isVideoEnabled ? 'Video Enabled' : 'Video Disabled' %>
+                </li>
+            <% }) %>
+        </ul>
     </div>
 </body>
 </html>

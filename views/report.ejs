@@ -3,33 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
+    <title>Report</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>Freelancer Reports</h1>
+        <h1>Time Tracking Report</h1>
+        <a href="/logout">Logout</a>
     </header>
-    <main>
-        <% reports.forEach(report => { %>
-            <section>
-                <h2>Freelancer: <%= report.freelancer %></h2>
-                <p>Total Hours: <%= report.totalHours %></p>
-                <p>Video Enabled: <%= report.isVideoEnabled ? 'Yes' : 'No' %></p>
-                <h3>Time Entries</h3>
-                <ul>
-                    <% report.timeEntries.forEach(entry => { %>
-                        <li>Start: <%= entry.startTime %>, End: <%= entry.endTime %></li>
-                    <% }) %>
-                </ul>
-                <h3>Activity Logs</h3>
-                <ul>
-                    <% report.activityLogs.forEach(log => { %>
-                        <li>Action: <%= log.action %>, Timestamp: <%= log.timestamp %></li>
-                    <% }) %>
-                </ul>
-            </section>
-        <% }) %>
-    </main>
+    <div class="container">
+        <h2>Time Entries</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% timeEntries.forEach(entry => { %>
+                    <tr>
+                        <td><%= entry.projectName %></td>
+                        <td><%= entry.startTime.toLocaleString() %></td>
+                        <td><%= entry.endTime ? entry.endTime.toLocaleString() : 'In Progress' %></td>
+                        <td>
+                            <% if (entry.endTime) { %>
+                                <%= ((new Date(entry.endTime) - new Date(entry.startTime)) / 1000 / 60).toFixed(2) %> minutes
+                            <% } else { %>
+                                In Progress
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
