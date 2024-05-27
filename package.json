@@ -14,7 +14,8 @@
     "express-session": "^1.17.1",
     "express-validator": "^7.1.0",
     "mongoose": "^8.4.0",
-    "webrtc-adapter": "^9.0.1"
+    "webrtc-adapter": "^9.0.1",
+    "ws": "^8.17.0"
   },
   "author": "",
   "license": "ISC"
